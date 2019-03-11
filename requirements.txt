@@ -1,0 +1,6 @@
+flask
+flask_restful
+markdown
+redis
+os
+json
