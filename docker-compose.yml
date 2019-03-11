@@ -1,6 +1,6 @@
 web:
   build: .
-  command: puthon app.py
+  command: python app.py
   ports:
     - "80:5000"
   volumes:
