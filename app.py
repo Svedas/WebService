@@ -1,6 +1,6 @@
 """
 
-	Mantas Svedas Info 3gr. Elektronines vaistines web servisas "EPharme"
+	Mantas Svedas Info 3gr. Elektronines vaistines web servisas "EPharma"
 	
 	Resources: Clients, ClientById, ClientByIdOrders
 	
@@ -16,13 +16,13 @@
 		DELETE		// Deletes all clients
 		
 	ClientById
-		GET			// Gets client data 
+		GET		// Gets client data 
 		POST 		// `Adds client order`
 		DELETE		// Deletes client
 		PUT			// Edits client data
 	
 	ClientByIdOrders
-		GET			// Shows client orders
+		GET		// Shows client orders
 		POST		// `Adds client order`
 		DELETE		// Deletes all client orders
 """
