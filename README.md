@@ -1,5 +1,10 @@
 # Reference for EPharma web service 
 
+### Setting up
+
+- git clone https://github.com/Svedas/WebService
+- docker-compose up --build -d
+
 ### Usage
 
 Responses have these forms:
