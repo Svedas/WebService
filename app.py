@@ -35,14 +35,14 @@ import markdown
 
 app = Flask(__name__)
 api = Api(app)
-redis = Redis(host='localhost', port=6379)
+redis = Redis(host='redis', port=6379)
 #re=StrictRedis(host="localhost", port=6379).keys()
 
 @app.route("/index")
 def index():
 	"""Present some documentation"""
 	#Opens the README file
-	with open(os.path.dirname(app.root_path) + '\README.md', 'r') as markdown_file:
+	with open(os.path.dirname(app.root_path) + '/code/README.md', 'r') as markdown_file:
 		#Reads the content of the file
 		content = markdown_file.read()
 		#Converts to HTML
@@ -225,5 +225,5 @@ api.add_resource(ClientByIdOrders, '/clients/<string:id>/orders')
 	
 if __name__ == '__main__':
 	app.run(debug=True)
-	#app.run(host="localhost", debug=True)
+	#app.run(host="0.0.0.0", debug=True)
 	
