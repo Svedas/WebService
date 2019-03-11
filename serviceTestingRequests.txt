@@ -1,32 +1,49 @@
 
 // List of all clients
 curl -i -X GET http://localhost:5000/clients
+curl -i -X GET http://193.219.91.103:16076/clients
+
 
 // Add new client
 curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Tester", "address": "MIF INFO", "email": "test@mif.vu.lt"}' http://localhost:5000/clients
+curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Tester", "address": "MIF INFO", "email": "test@mif.vu.lt"}' http://193.219.91.103:16076/clients
+
 
 // Deleting all clients
 curl -i -X DELETE http://localhost:5000/clients
+curl -i -X DELETE http://193.219.91.103:16076/clients
+
 
 // Getting client info
 curl -i -X GET http://localhost:5000/clients/5
+curl -i -X GET http://193.219.91.103:16076/clients/5
+
 
 // Deleting client
 curl -i -X DELETE http://localhost:5000/clients/5
+curl -i -X DELETE http://193.219.91.103:16076/clients
+
 
 // Updating client
 curl -i -H "Content-Type: application/json" -X PUT -d '{"name":"Tester Two", "address": "MIF INFO", "email": "test@mif.vu.lt"}' http://localhost:5000/clients/5
+curl -i -H "Content-Type: application/json" -X PUT -d '{"name":"Tester Two", "address": "MIF INFO", "email": "test@mif.vu.lt"}' http://193.219.91.103:16076/clients/5
+
 
 // List of client's orders
 curl -i -X GET http://localhost:5000/clients/5/orders
+curl -i -X GET http://193.219.91.103:16076/clients
+
 
 // Adding new order for client
 curl -i -H "Content-Type: application/json" -X POST -d '{"item":"Pills", "price":"16.90", "amount":"10"}' http://localhost:5000/clients/5
+curl -i -H "Content-Type: application/json" -X POST -d '{"item":"Pills", "price":"16.90", "amount":"10"}' http://193.219.91.103:16076/clients/5
 
 curl -i -H "Content-Type: application/json" -X POST -d '{"item":"Pills", "price":"16.90", "amount":"10"}' http://localhost:5000/clients/5/orders
+curl -i -H "Content-Type: application/json" -X POST -d '{"item":"Pills", "price":"16.90", "amount":"10"}' http://193.219.91.103:16076/clients/5/orders
 
 
 // Deleting all client's orders
 curl -i -X DELETE http://localhost:5000/clients/5/orders
+curl -i -X DELETE http://193.219.91.103:16076/clients/5/orders
 
 
