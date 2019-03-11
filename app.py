@@ -42,7 +42,7 @@ redis = Redis(host='localhost', port=6379)
 def index():
 	"""Present some documentation"""
 	#Opens the README file
-	with open(os.path.dirname(app.root_path) + '\EPharma\README.md', 'r') as markdown_file:
+	with open(os.path.dirname(app.root_path) + '\README.md', 'r') as markdown_file:
 		#Reads the content of the file
 		content = markdown_file.read()
 		#Converts to HTML
