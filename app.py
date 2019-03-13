@@ -51,10 +51,10 @@ def index():
 
 class WelcomeScreen(Resource):
 	def get(self):
-		redis.redis.incr('first')
-		redis.redis.decr('first')
-		redis.redis.incr('clients_counter')
-		redis.redis.decr('clients_counter')
+		redis.incr('first')
+		redis.decr('first')
+		redis.incr('clients_counter')
+		redis.decr('clients_counter')
 		if (redis.get('clients_counter').decode('UTF-8') == 0 and redis.get('first').decode('UTF-8') == 0):
 			redis.set('client1','{"name":"Tester", "address": "MIF INFO 3", "email": "testing@mif.vu.lt"}')
 			redis.set('client2','{"name":"Testeris2", "address": "MIF INFO 33", "email": "tester@mif.vu.lt"}')
