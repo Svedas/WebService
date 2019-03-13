@@ -66,7 +66,7 @@ class WelcomeScreen(Resource):
 			redis.set('client1_counter', 0)
 			redis.set('client2_counter', 2)
 			redis.set('client3_counter', 1)
-		    	redis.incr('first')
+			redis.incr('first')
 		return "Welcome to this site, go to ./index for information"
 	
 	#debug func
