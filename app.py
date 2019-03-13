@@ -87,7 +87,7 @@ class Clients(Resource):
 		#Checks if there are any clients
 		redis_clients_counter = 'clients_counter'
 		if redis.exists(redis_clients_counter) == 0:
-			return "Not found", 404	
+			return {'info': "Not found"}, 404	
 		clients_counter = redis.get(redis_clients_counter).decode('UTF-8')
 		#Collects and returns clients
 		clients = []
@@ -97,7 +97,7 @@ class Clients(Resource):
 				clients.append(json.loads(redis.get(client_key)))
 		#return {"info": "Clients info. Total {} Clients".format(redis.get('clients_counter').decode('UTF-8'))}
 		if len(clients) == 0:
-			return "Not found, no clients", 404
+			return {'info': "Not found, no clients"}, 404
 		return clients, 200
 		
 	def post(self):
@@ -117,13 +117,13 @@ class Clients(Resource):
 		client_orders_counter = client_key[:-1] + "_counter'" # returns 'client<?>_counter'
 		redis.set(client_orders_counter, 0)
 		#return {"info": "Client added with id {}, {} ".format(client_nr,client_key)}, 201
-		return "Created", 201
+		return {'info': "Created"}, 201
 	
 	def delete(self):
 		#Checks if there are any clients
 		redis_clients_counter = 'clients_counter'
 		if redis.exists(redis_clients_counter) == 0:
-			return "Not found", 404
+			return {'info': "Not found"}, 404
 		#Deletes all clients
 		clients_counter = redis.get(redis_clients_counter).decode('UTF-8')
 		for x in range(1, int(clients_counter)+1):
@@ -131,10 +131,10 @@ class Clients(Resource):
 			if redis.exists(client_key) == 1:
 				redis.delete(client_key)
 		redis.set('clients_counter',0)		
-		return "No content", 204
+		return {'info': "No content"}, 204
 	
 	def put(self):
-		return "Not Allowed", 405
+		return {'info': "Not Allowed"}, 405
 		
 
 class ClientById(Resource):
@@ -142,7 +142,7 @@ class ClientById(Resource):
 		#Checks for client
 		client_key = "'"+ "client" + id + "'"
 		if  redis.exists(client_key) == 0:
-			return "Not Found, no such client",404
+			return {'info': "Not Found, no such client"},404
 		#Returns client info
 		client_by_id_json = json.loads(redis.get(client_key))
 		return client_by_id_json, 200
@@ -151,17 +151,17 @@ class ClientById(Resource):
 		order_json = json.dumps( request.get_json() )
 		#Checks for client
 		if redis.exists("'"+ "client"+id+"'") == 0:
-			return "Not found, no such client", 404
+			return {'info': "Not found, no such client"}, 404
 		redis_client_order_counter = "'"+ "client" + id + "_counter'"
 		if redis.exists(redis_client_order_counter) == 0:
-			return "Not found", 404
+			return {'info': "Not found"}, 404
 		redis.incr(redis_client_order_counter)
 		#Adds order
 		client_order_nr = redis.get(redis_client_order_counter).decode('UTF-8')
 		order_key = "'"+ "client" + id + "_order"+ client_order_nr + "'"	# gives 'client<?>_order<?>'
 		redis.set(order_key, order_json)
 		#return {"info": "Order {} for client {} added ".format(client_order_nr, id)}, 201
-		return "Created", 201
+		return {'info': "Created"}, 201
 		
 	def delete(self, id):
 		client_key = "'"+ "client" + id + "'"
@@ -170,13 +170,13 @@ class ClientById(Resource):
 			ClientByIdOrders.delete(self,id)
 			redis.delete(client_key)
 			return "No content", 204
-		return "Not Found",404
+		return {'info': "Not Found"},404
 		
 	def put(self,id):
 		#Checks for client
 		client_key = "'"+ "client" + id + "'"
 		if redis.exists(client_key) == 0:
-			return "Not found, no such client", 404
+			return {'info': "Not found, no such client"}, 404
 		#Json request modification
 		content = request.data  
 		content_json = json.loads(content)
@@ -185,17 +185,17 @@ class ClientById(Resource):
 		#Edits client
 		redis.set(client_key, client_json)
 		#return {"info": "Client edited with id {} ".format(id)}, 201
-		return "Created", 201
+		return {'info': "Created"}, 201
 
 
 class ClientByIdOrders(Resource):
 	def get(self,id):
 		#Checks for client
 		if redis.exists("'"+ "client"+id+"'") == 0:
-			return "Not found", 404
+			return {'info': "Not found"}, 404
 		redis_client_orders_counter = "'"+ "client" + id + "_counter'"		#example "'client8_counter'"
 		if int(redis.get(redis_client_orders_counter).decode('UTF-8')) == 0:
-			return "Not found, no orders", 404
+			return {'info': "Not found, no orders"}, 404
 		client_orders_counter = redis.get("'"+ "client" + id + "_counter'").decode('UTF-8')
 		#Shows client orders
 		orders = []
@@ -205,7 +205,7 @@ class ClientByIdOrders(Resource):
 				orders.append(json.loads(redis.get(order_key)))
 		#return [{"info": "You should see client's {} orders".format(id)}, orders]
 		if len(orders) == 0:
-			return "Not found", 404
+			return {'info': "Not found"}, 404
 		return orders, 200
 	
 	
@@ -213,26 +213,26 @@ class ClientByIdOrders(Resource):
 		order_json = json.dumps( request.get_json() )
 		#Checks for client
 		if redis.exists("'"+ "client"+id+"'") == 0:
-			return "Not found", 404
+			return {'info': "Not found"}, 404
 		redis_client_orders_counter = "'" + "client" + id + "_counter'"
 		if redis.exists(redis_client_orders_counter) == 0:
-			return "Not found", 404
+			return {'info': "Not found"}, 404
 		redis.incr(redis_client_orders_counter)
 		#Adds order
 		client_order_nr = redis.get(redis_client_orders_counter).decode('UTF-8')
 		order_key = "'"+ "client" + id + "_order" + client_order_nr + "'"
 		redis.set(order_key, order_json)
 		#return {"info": "Client {} order {} added ".format(id, client_order_nr)}, 201
-		return "Created", 201		
+		return {'info': "Created"}, 201		
 	
 	def delete(self, id):
 		#Checks if client exists
 		if redis.exists("'"+ "client"+id+"'") == 0:
-			return "Not found", 404
+			return {'info': "Not found"}, 404
 		#Checks if there are orders
 		redis_client_orders_counter = "'" + "client" + id + "_counter'"
 		if int(redis.get(redis_client_orders_counter).decode('UTF-8')) == 0:
-			return "Not found, no orders", 404
+			return {'info': "Not found, no orders"}, 404
 		#Deletes all client's orders
 		client_orders_counter = redis.get(redis_client_orders_counter).decode('UTF-8')
 		for x in range(1, int(client_orders_counter)+1):
@@ -240,10 +240,10 @@ class ClientByIdOrders(Resource):
 			if redis.exists(order_key) == 1:
 				redis.delete(order_key)
 		redis.set(redis_client_orders_counter,0)		
-		return "No content", 204
+		return {'info': "No content"}, 204
 	
 	def put(self):
-		return "Not Allowed", 405
+		return {'info': "Not Allowed"}, 405
 				
 		
 api.add_resource(WelcomeScreen, '/')
