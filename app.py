@@ -51,7 +51,7 @@ def index():
 
 class WelcomeScreen(Resource):
 	def get(self):	
-		startup = 'startup'
+		startup = 'boot'
 		if redis.exists(startup) == 0:
 			redis.set("'client1'",'{"name":"Tester", "address": "MIF INFO 3", "email": "testing@mif.vu.lt"}')
 			redis.set("'client2'",'{"name":"Testeris2", "address": "MIF INFO 33", "email": "tester@mif.vu.lt"}')
