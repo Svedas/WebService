@@ -27,232 +27,326 @@
 		DELETE		// Deletes all client orders
 """
 
-from flask import Flask, request
-from flask_restful import Resource, Api
-from redis import Redis
+from flask import Flask, request, g
+from flask_restful import Resource, Api, reqparse
 import os, json
 import markdown
+import shelve
 
 app = Flask(__name__)
 api = Api(app)
-redis = Redis(host='redis', port=6379)
-#re=StrictRedis(host="localhost", port=6379).keys()
 
 @app.route("/index")
 def index():
 	"""Present some documentation"""
 	#Opens the README file
 	with open(os.path.dirname(app.root_path) + '/code/README.md', 'r') as markdown_file:
+	#with open(os.path.dirname(app.root_path) + '\EPharma\README.md', 'r') as markdown_file:
 		#Reads the content of the file
 		content = markdown_file.read()
 		#Converts to HTML
 		return markdown.markdown(content)
-
-
-class WelcomeScreen(Resource):
-	def get(self):	
-		startup = 'start___up'
-		if redis.exists(startup) == 0:
-			c1 = "'client1'"
-			c2 = "'client2'"
-			c3 = "'client3'"
-			redis.set("'client1'",'{"name":"Tester", "address": "MIF INFO 3", "email": "testing@mif.vu.lt", "id": "\'client1\'"}')
-			redis.set("'client2'",'{"name":"Testeris2", "address": "MIF INFO 33", "email": "tester@mif.vu.lt", "id": "\'client2\'"}')
-			redis.set("'client3'",'{"name":"Tester3", "address": "MIF INFO", "email": "test@mif.vu.lt", "id": "\'client3\'"}')
-			redis.set("'client2_order1'",'{"item":"Pills", "price":"16.90", "amount":"10"}')
-			redis.set("'client2_order2'",'{"item":"Cough Syrup", "price":"20.90", "amount":"10"}')
-			redis.set("'client3_order1'",'{"item":"Mega Pills", "price":"6.90", "amount":"5"}')
-			redis.set("'clients_counter'", 3)
-			redis.set("'client1_counter'", 0)
-			redis.set("'client2_counter'", 2)
-			redis.set("'client3_counter'", 1)
-			redis.incr(startup)
-			return "Welcome to this new site, go to ./index for information"
-		return "Welcome to this site, go to ./index for information"
-	
-	#debug func
-	def post(self):
-		some_json = request.get_json()
-		return [{'info': "you sent"},some_json], 201
-	
-	def delete(self):
-		return "Not Allowed", 405
-	
-	def put(self):
-		return "Not Allowed", 405
 		
 		
 class Clients(Resource):
 	def get(self):
+		shelf = get_db()
+	
+		clients_counter = 0
 		#Checks if there are any clients
-		redis_clients_counter = 'clients_counter'
-		if redis.exists(redis_clients_counter) == 0:
-			return {'info': "Not found"}, 404	
-		clients_counter = redis.get(redis_clients_counter).decode('UTF-8')
+		if "clients_counter" in shelf:
+			clients_counter = shelf["clients_counter"]
+		if clients_counter == 0:
+			return {'message': "Not found, try going to root URL", 'data': []}, 404
+			
 		#Collects and returns clients
 		clients = []
-		for x in range(1, int(clients_counter)+1):
-			client_key = "'"+ "client" + str(x) + "'"
-			if  redis.exists(client_key) == 1:
-				clients.append(json.loads(redis.get(client_key)))
-		#return {"info": "Clients info. Total {} Clients".format(redis.get('clients_counter').decode('UTF-8'))}
+		for x in range(1, clients_counter+1):
+			client_key = "client" + str(x)
+			if client_key in shelf:
+				clients.append(shelf[client_key])
+				
 		if len(clients) == 0:
-			return {'info': "Not found, no clients"}, 404
-		return clients, 200
+			return {'message': "Not found, no clients", 'data': []}, 404
+		return {'message': "OK", 'data': clients}, 200
+		
 		
 	def post(self):
-		redis_clients_counter = 'clients_counter'
-		redis.incr(redis_clients_counter)
-		#client_json = json.dumps( request.get_json() )
-		client_nr = redis.get(redis_clients_counter).decode('UTF-8')
-		client_key = "'"+ "client" + client_nr + "'"
-		#client_nr = "{}".format( redis.get('clients_counter') )[2:-1] #alternative formating
-		#Json request modification
-		content = request.data  
-		content_json = json.loads(content)
-		content_json.update({'id': client_key})
-		client_json = json.dumps(content_json)
-		#Adds client
-		redis.set(client_key, client_json)
-		client_orders_counter = client_key[:-1] + "_counter'" # returns 'client<?>_counter'
-		redis.set(client_orders_counter, 0)
-		#return {"info": "Client added with id {}, {} ".format(client_nr,client_key)}, 201
-		return {'info': "Created"}, 201
+		shelf = get_db()
+		
+		#Request validation
+		parser = reqparse.RequestParser()
+		parser.add_argument('name', required=True)
+		parser.add_argument('address', required=True)
+		parser.add_argument('email', required=True)
+		
+		#Adds a client
+		client_nr = shelf["clients_counter"]
+		client_nr += 1
+		shelf["clients_counter"] = client_nr
+		client_key = "client" + str(client_nr)
+		args = parser.parse_args()
+		args.update({'id': client_key})
+		#args = json.dumps(args)
+		
+		print(args)
+		#if client_key in shelf:
+		shelf[client_key] = args
+		client_orders_counter = client_key + "_counter" # client<?>_counter
+		shelf[client_orders_counter] = 0
+		
+		return {'message': "Created", 'data': args}, 201
+		
 	
 	def delete(self):
+		shelf = get_db()
+		
 		#Checks if there are any clients
-		redis_clients_counter = 'clients_counter'
-		if redis.exists(redis_clients_counter) == 0:
-			return {'info': "Not found"}, 404
+		client_nr = shelf["clients_counter"]
+		if client_nr == 0:
+			return {'message': "Not found, no clients", 'data': []}, 404
+			
 		#Deletes all clients
-		clients_counter = redis.get(redis_clients_counter).decode('UTF-8')
-		for x in range(1, int(clients_counter)+1):
-			client_key = "'"+ "client" + str(x) + "'"
-			if redis.exists(client_key) == 1:
-				redis.delete(client_key)
-		redis.set('clients_counter',0)		
-		return {'info': "No content"}, 204
+		for x in range(1, client_nr+1):
+			client_key = "client" + str(x)
+			if client_key in shelf:
+				del shelf[client_key]
+		shelf["clients_counter"] = 0		
+		return {'message': "No content", 'data': []}, 204
+		
 	
 	def put(self):
-		return {'info': "Not Allowed"}, 405
+		return {'message': "Not Allowed", 'data': []}, 405
 		
 
 class ClientById(Resource):
 	def get(self, id):
+		shelf = get_db()
+		
 		#Checks for client
-		client_key = "'"+ "client" + id + "'"
-		if  redis.exists(client_key) == 0:
-			return {'info': "Not Found, no such client"},404
+		client_key = "client" + id
+		if client_key not in shelf:
+			return {'message': "Not Found, no such client", 'data': []},404
+			
 		#Returns client info
-		client_by_id_json = json.loads(redis.get(client_key))
-		return client_by_id_json, 200
+		args = shelf[client_key]
+		return {'message': "OK", 'data': args}, 200
+		
 		
 	def post(self, id):
-		order_json = json.dumps( request.get_json() )
+		shelf = get_db()
+		
 		#Checks for client
-		if redis.exists("'"+ "client"+id+"'") == 0:
-			return {'info': "Not found, no such client"}, 404
-		redis_client_order_counter = "'"+ "client" + id + "_counter'"
-		if redis.exists(redis_client_order_counter) == 0:
-			return {'info': "Not found"}, 404
-		redis.incr(redis_client_order_counter)
+		client_key = "client" + id
+		if client_key not in shelf:
+			return {'message': "Not Found, no such client", 'data': []},404
+		
+		#Request validation
+		parser = reqparse.RequestParser()
+		parser.add_argument('item', required=True)
+		parser.add_argument('price', required=True)
+		parser.add_argument('amount', required=True)
+		args = parser.parse_args()
+		#args = json.dumps(args)
+		
 		#Adds order
-		client_order_nr = redis.get(redis_client_order_counter).decode('UTF-8')
-		order_key = "'"+ "client" + id + "_order"+ client_order_nr + "'"	# gives 'client<?>_order<?>'
-		redis.set(order_key, order_json)
-		#return {"info": "Order {} for client {} added ".format(client_order_nr, id)}, 201
-		return {'info': "Created"}, 201
+		db_client_order_counter = "client" + id + "_counter"
+		order_nr = shelf[db_client_order_counter]
+		order_nr += 1
+		shelf[db_client_order_counter] = order_nr
+		order_key = "client" + id + "_order" + str(order_nr)	# client<?>_order<?>
+		
+		#if order_key in shelf:
+		shelf[order_key] = args
+		
+		return {'message': "Created", 'data': args}, 201
+		
 		
 	def delete(self, id):
-		client_key = "'"+ "client" + id + "'"
-		if  redis.exists(client_key) == 1:
-			#Deletes orders, then client
-			ClientByIdOrders.delete(self,id)
-			redis.delete(client_key)
-			return "No content", 204
-		return {'info': "Not Found"},404
+		shelf = get_db()
+		
+		#Checks for client
+		client_key = "client" + id
+		if client_key not in shelf:
+			return {'message': "Not Found, no such client", 'data': []},404
+
+		#Deletes all client's orders
+		db_client_orders_counter = "client" + id + "_counter"	#example "client8_counter"
+		order_counter = shelf[db_client_orders_counter]
+		for x in range(1, order_counter+1):
+			order_key = "client" + id + "_order"+ str(x)
+			if order_key in shelf:
+				del shelf[order_key]
+		shelf[db_client_orders_counter] = 0		
+		
+		#Deletes client
+		del shelf[client_key]
+		del shelf[db_client_orders_counter]
+		
+		return {'message': "No content", 'data': []}, 204
+
 		
 	def put(self,id):
+		shelf = get_db()
+		
 		#Checks for client
-		client_key = "'"+ "client" + id + "'"
-		if redis.exists(client_key) == 0:
-			return {'info': "Not found, no such client"}, 404
-		#Json request modification
-		content = request.data  
-		content_json = json.loads(content)
-		content_json.update({'id': client_key})
-		client_json = json.dumps(content_json)
+		client_key = "client" + id
+		if client_key not in shelf:
+			return {'message': "Not Found, no such client", 'data': []},404
+		
+		#Request validation
+		parser = reqparse.RequestParser()
+		parser.add_argument('name', required=True)
+		parser.add_argument('address', required=True)
+		parser.add_argument('email', required=True)
+		args = parser.parse_args()
+		args.update({'id': client_key})
+		#args = json.dumps(args)
+		
 		#Edits client
-		redis.set(client_key, client_json)
-		#return {"info": "Client edited with id {} ".format(id)}, 201
-		return {'info': "Created"}, 201
+		shelf[client_key] = args
+		return {'message': "Created", 'data': args}, 201
 
 
 class ClientByIdOrders(Resource):
 	def get(self,id):
+		shelf = get_db()
+		
 		#Checks for client
-		if redis.exists("'"+ "client"+id+"'") == 0:
-			return {'info': "Not found"}, 404
-		redis_client_orders_counter = "'"+ "client" + id + "_counter'"		#example "'client8_counter'"
-		if int(redis.get(redis_client_orders_counter).decode('UTF-8')) == 0:
-			return {'info': "Not found, no orders"}, 404
-		client_orders_counter = redis.get("'"+ "client" + id + "_counter'").decode('UTF-8')
+		client_key = "client" + id
+		if client_key not in shelf:
+			return {'message': "Not Found, no such client", 'data': []},404
+			
+		#Checks for orders
+		db_client_orders_counter = "client" + id + "_counter"	#example "client8_counter"
+		order_counter = shelf[db_client_orders_counter]
+		if order_counter == 0:
+			return {'message': "Not found, no orders", 'data': []}, 404
+			
 		#Shows client orders
 		orders = []
-		for x in range(1, int(client_orders_counter)+1):
-			order_key = "'"+ "client" + id + "_order"+ str(x) + "'"
-			if redis.exists(order_key) == 1:
-				orders.append(json.loads(redis.get(order_key)))
-		#return [{"info": "You should see client's {} orders".format(id)}, orders]
+		for x in range(1, order_counter+1):
+			order_key = "client" + id + "_order"+ str(x)
+			if order_key in shelf:
+				orders.append(shelf[order_key])
+				
 		if len(orders) == 0:
-			return {'info': "Not found"}, 404
-		return orders, 200
+			return {'message': "Not found", 'data': []}, 404
+		return {'message': "OK", 'data': orders}, 200
 	
 	
 	def post(self,id):
-		order_json = json.dumps( request.get_json() )
+		shelf = get_db()
+		
 		#Checks for client
-		if redis.exists("'"+ "client"+id+"'") == 0:
-			return {'info': "Not found"}, 404
-		redis_client_orders_counter = "'" + "client" + id + "_counter'"
-		if redis.exists(redis_client_orders_counter) == 0:
-			return {'info': "Not found"}, 404
-		redis.incr(redis_client_orders_counter)
+		client_key = "client" + id
+		if client_key not in shelf:
+			return {'message': "Not Found, no such client", 'data': []},404
+		
+		#Request validation
+		parser = reqparse.RequestParser()
+		parser.add_argument('item', required=True)
+		parser.add_argument('price', required=True)
+		parser.add_argument('amount', required=True)
+		args = parser.parse_args()
+		#args = json.dumps(args)
+		
 		#Adds order
-		client_order_nr = redis.get(redis_client_orders_counter).decode('UTF-8')
-		order_key = "'"+ "client" + id + "_order" + client_order_nr + "'"
-		redis.set(order_key, order_json)
-		#return {"info": "Client {} order {} added ".format(id, client_order_nr)}, 201
-		return {'info': "Created"}, 201		
+		db_client_order_counter = "client" + id + "_counter"
+		order_nr = shelf[db_client_order_counter]
+		order_nr += 1
+		shelf[db_client_order_counter] = order_nr
+		order_key = "client" + id + "_order" + str(order_nr)	# client<?>_order<?>
+		
+		#if order_key in shelf:
+		shelf[order_key] = args
+		
+		return {'message': "Created", 'data': args}, 201
+		
 	
 	def delete(self, id):
-		#Checks if client exists
-		if redis.exists("'"+ "client"+id+"'") == 0:
-			return {'info': "Not found"}, 404
-		#Checks if there are orders
-		redis_client_orders_counter = "'" + "client" + id + "_counter'"
-		if int(redis.get(redis_client_orders_counter).decode('UTF-8')) == 0:
-			return {'info': "Not found, no orders"}, 404
+		shelf = get_db()
+		
+		#Checks for client
+		client_key = "client" + id
+		if client_key not in shelf:
+			return {'message': "Not Found, no such client", 'data': []},404
+
+		#Checks for orders
+		db_client_orders_counter = "client" + id + "_counter"	#example "client8_counter"
+		order_counter = shelf[db_client_orders_counter]
+		if order_counter == 0:
+			return {'message': "Not found, no orders", 'data': []}, 404
+		
 		#Deletes all client's orders
-		client_orders_counter = redis.get(redis_client_orders_counter).decode('UTF-8')
-		for x in range(1, int(client_orders_counter)+1):
-			order_key = "'"+ "client" + id + "_order"+ str(x) + "'"
-			if redis.exists(order_key) == 1:
-				redis.delete(order_key)
-		redis.set(redis_client_orders_counter,0)		
-		return {'info': "No content"}, 204
+		for x in range(1, order_counter+1):
+			order_key = "client" + id + "_order"+ str(x)
+			if order_key in shelf:
+				del shelf[order_key]
+		shelf[db_client_orders_counter] = 0		
+		return {'message': "No content", 'data': []}, 204
+		
 	
 	def put(self):
-		return {'info': "Not Allowed"}, 405
+		return {'message': "Not Allowed", 'data': []}, 405
+		
+		
+class WelcomeScreen(Resource):
+	def get(self):	
+		shelf = get_db()
+		db_client_counter = "clients_counter"
+		if db_client_counter not in shelf:
+			demo()
+			return {'message': "Welcome to this new site, go to ./index for information", 'data': []}, 200
+		return {'message': "Welcome to this site, go to ./index for information", 'data': []}, 200
+		
+	
+	#debug func
+	def post(self):
+		some_json = request.get_json()
+		return {'message': "you sent request", 'data': some_json}, 201
+	
+	def delete(self):
+		return {'message': "Not Allowed", 'data': []}, 405
+	
+	def put(self):
+		return {'message': "Not Allowed", 'data': []}, 405
 				
 		
 api.add_resource(WelcomeScreen, '/')
 api.add_resource(Clients, '/clients')
 api.add_resource(ClientById, '/clients/<string:id>')
 api.add_resource(ClientByIdOrders, '/clients/<string:id>/orders')
+
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = shelve.open("shelf.db")
+    return db
+
+
+@app.teardown_appcontext
+def teardown_db(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 	
+def demo():
+	shelf = get_db()
+	shelf["clients_counter"] = 0
+	shelf["client1"] = {'name': 'Tester1', 'address': 'MIF INFO 3', 'email': 'testing@mif.vu.lt', 'id': 'client1'}
+	shelf["client2"] = {'name': 'Tester1', 'address': 'MIF INFO 3', 'email': 'testing@mif.vu.lt', 'id': 'client2'}
+	shelf["client3"] = {'name': 'Tester1', 'address': 'MIF INFO 3', 'email': 'testing@mif.vu.lt', 'id': 'client3'}
+	shelf["client2_order1"] = {'item': 'Pills', 'price': '16.90', 'amount': '10'}
+	shelf["client2_order2"] = {'item': 'Cough Syrup', 'price': '20.90', 'amount': '5'}
+	shelf["client3_order1"] = {'item': 'Mega Pills', 'price': '4.90', 'amount': '2'}
+	shelf["clients_counter"] = 3
+	shelf["client1_counter"] = 0
+	shelf["client2_counter"] = 2
+	shelf["client3_counter"] = 1
+	return
 	
 if __name__ == '__main__':
-	#app.run(debug=True)
 	app.run(host="0.0.0.0", debug=True)
+	#app.run(host="localhost", debug=True)
 	

@@ -9,6 +9,15 @@
 
 Responses have these forms:
 
+**Form format**
+
+```json
+{
+	"message": "Information",
+	"data": []
+}
+```
+
 **Client form**
 
 ```json
