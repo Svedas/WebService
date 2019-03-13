@@ -53,9 +53,12 @@ class WelcomeScreen(Resource):
 	def get(self):	
 		startup = 'boot'
 		if redis.exists(startup) == 0:
-			redis.set("'client1'",'{"name":"Tester", "address": "MIF INFO 3", "email": "testing@mif.vu.lt", "id": "'client1'"}')
-			redis.set("'client2'",'{"name":"Testeris2", "address": "MIF INFO 33", "email": "tester@mif.vu.lt", "id": "'client2'"}')
-			redis.set("'client3'",'{"name":"Tester3", "address": "MIF INFO", "email": "test@mif.vu.lt", "id": "'client3'"}')
+			c1 = "'client1'"
+			c2 = "'client2'"
+			c3 = "'client3'"
+			redis.set("'client1'",'{"name":"Tester", "address": "MIF INFO 3", "email": "testing@mif.vu.lt", "id": "+c1+"}')
+			redis.set("'client2'",'{"name":"Testeris2", "address": "MIF INFO 33", "email": "tester@mif.vu.lt", "id": "+c2+"}')
+			redis.set("'client3'",'{"name":"Tester3", "address": "MIF INFO", "email": "test@mif.vu.lt", "id": "+c3+"}')
 			redis.set("'client2_order1'",'{"item":"Pills", "price":"16.90", "amount":"10"}')
 			redis.set("'client2_order2'",'{"item":"Cough Syrup", "price":"20.90", "amount":"10"}')
 			redis.set("'client3_order1'",'{"item":"Mega Pills", "price":"6.90", "amount":"5"}')
