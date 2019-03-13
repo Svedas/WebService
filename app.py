@@ -74,6 +74,12 @@ class WelcomeScreen(Resource):
 	def post(self):
 		some_json = request.get_json()
 		return [{'info': "you sent"},some_json], 201
+	
+	def delete(self):
+		return "Not Allowed", 405
+	
+	def put(self):
+		return "Not Allowed", 405
 		
 		
 class Clients(Resource):
@@ -126,6 +132,9 @@ class Clients(Resource):
 				redis.delete(client_key)
 		redis.set('clients_counter',0)		
 		return "No content", 204
+	
+	def put(self):
+		return "Not Allowed", 405
 		
 
 class ClientById(Resource):
@@ -232,6 +241,9 @@ class ClientByIdOrders(Resource):
 				redis.delete(order_key)
 		redis.set(redis_client_orders_counter,0)		
 		return "No content", 204
+	
+	def put(self):
+		return "Not Allowed", 405
 				
 		
 api.add_resource(WelcomeScreen, '/')
