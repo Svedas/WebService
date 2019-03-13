@@ -55,9 +55,9 @@ class WelcomeScreen(Resource):
 			redis.set('client1','{"name":"Tester", "address": "MIF INFO 3", "email": "testing@mif.vu.lt"}')
 			redis.set('client2','{"name":"Testeris2", "address": "MIF INFO 33", "email": "tester@mif.vu.lt"}')
 			redis.set('client3','{"name":"Tester3", "address": "MIF INFO", "email": "test@mif.vu.lt"}')
-			redis.set('client2_order1','{"item":"Pills", "price":"16.90", "amount":"10"}'
-			redis.set('client2_order2','{"item":"Cough Syrup", "price":"20.90", "amount":"10"}'
-			redis.set('client3_order1','{"item":"Mega Pills", "price":"6.90", "amount":"5"}'
+			redis.set('client2_order1','{"item":"Pills", "price":"16.90", "amount":"10"}')
+			redis.set('client2_order2','{"item":"Cough Syrup", "price":"20.90", "amount":"10"}')
+			redis.set('client3_order1','{"item":"Mega Pills", "price":"6.90", "amount":"5"}')
 			redis.set('clients_counter', 3)
 			redis.set('client1_counter', 0)
 			redis.set('client2_counter', 2)
@@ -86,7 +86,7 @@ class Clients(Resource):
 				clients.append(json.loads(redis.get(client_key)))
 		#return {"info": "Clients info. Total {} Clients".format(redis.get('clients_counter').decode('UTF-8'))}
 		if len(clients) == 0:
-			return "Not found", 404
+			return "Not found, no clients", 404
 		return clients, 200
 		
 	def post(self):
@@ -128,7 +128,7 @@ class ClientById(Resource):
 		#Checks for client
 		client_key = "'"+ "client" + id + "'"
 		if  redis.exists(client_key) == 0:
-			return "Not Found",404
+			return "Not Found, no such client",404
 		#Returns client info
 		client_by_id_json = json.loads(redis.get(client_key))
 		return client_by_id_json, 200
@@ -137,7 +137,7 @@ class ClientById(Resource):
 		order_json = json.dumps( request.get_json() )
 		#Checks for client
 		if redis.exists("'"+ "client"+id+"'") == 0:
-			return "Not found", 404
+			return "Not found, no such client", 404
 		redis_client_order_counter = "'"+ "client" + id + "_counter'"
 		if redis.exists(redis_client_order_counter) == 0:
 			return "Not found", 404
@@ -162,7 +162,7 @@ class ClientById(Resource):
 		#Checks for client
 		client_key = "'"+ "client" + id + "'"
 		if redis.exists(client_key) == 0:
-			return "Not found", 404
+			return "Not found, no such client", 404
 		#Json request modification
 		content = request.data  
 		content_json = json.loads(content)
