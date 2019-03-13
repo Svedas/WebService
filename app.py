@@ -51,7 +51,7 @@ def index():
 
 class WelcomeScreen(Resource):
 	def get(self):	
-		startup = 'boot'
+		startup = 'start_up'
 		if redis.exists(startup) == 0:
 			c1 = "'client1'"
 			c2 = "'client2'"
