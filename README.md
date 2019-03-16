@@ -22,10 +22,15 @@ Responses have these forms:
 
 ```json
 {
-	"name": "Vardenis Pavardenis",
-	"address": "Vilnius, Didlaukio g. 14",
-	"email": "test@mail.com",
-	"id": "client24"
+	"message": "OK",
+	"data": [
+	   {
+		"name": "Vardenis Pavardenis",
+		"address": "Vilnius, Didlaukio g. 14",
+		"email": "test@mail.com",
+		"id": "client24"
+	   }
+	]
 }
 ```
 
@@ -33,9 +38,15 @@ Responses have these forms:
 
 ```json
 {
-	"name": "Apap",
-	"price": "50.00",
-	"amount": "10"
+	"message": "OK",
+	"data": [
+	   {
+		"item": "Apap",
+		"price": "50.00",
+		"amount": "10"
+	   }
+	]
+	
 }
 ```
 
@@ -51,20 +62,23 @@ Responses have these forms:
 - `200 OK` on success
 
 ```json
-[
-	{
+{
+	"message": "OK",
+	"data": [
+	   {
 		"name": "Vardenis Pavardenis",
 		"address": "Vilnius, Didlaukio g. 14",
 		"email": "test@mail.com",
 		"id": "client24"
-	},
-	{
+	   },
+	   {
 		"name": "Vardas Vardenis",
 		"address": "Vilnius, Naugarduko g. 24",
 		"email": "test@anothermail.com",
 		"id": "client5"
-	}
-]
+	   }
+	]
+}
 ```
 
 
@@ -109,10 +123,15 @@ Responses have these forms:
 
 ```json
 {
-	"name": "Vardenis Pavardenis",
-	"address": "Vilnius, Didlaukio g. 14",
-	"email": "test@mail.com",
-	"id": "client24"
+	"message": "OK",
+	"data": [
+	   {
+		"name": "Vardenis Pavardenis",
+		"address": "Vilnius, Didlaukio g. 14",
+		"email": "test@mail.com",
+		"id": "client24"
+	   }
+	]
 }
 ```
 
@@ -157,18 +176,21 @@ Responses have these forms:
 - `200 OK` on success
 
 ```json
-[
-	{
+{
+	"message": "OK",
+	"data": [
+	   {
 		"item": "AnyCommonMedication",
 		"price": "12.00",
 		"amount": "2"
-	},
-	{
+	   },
+	   {
 		"item": "SomeGenericMedication",
 		"price": "18.50",
 		"amount": "3"
-	}
-]
+	   }
+	]
+}
 ```
 
 
