@@ -2,7 +2,7 @@
 
 ### Setting up
 
-- git clone https://github.com/Svedas/WebService
+- git clone https://github.com/Svedas/WebService_Restful
 - docker-compose up --build -d
 
 ### Usage
