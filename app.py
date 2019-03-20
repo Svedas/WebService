@@ -81,11 +81,11 @@ class Clients(Resource):
 		parser.add_argument('email', required=True)
 		
 		#Adds a client
+		args = parser.parse_args()
 		client_nr = shelf["clients_counter"]
 		client_nr += 1
 		shelf["clients_counter"] = client_nr
 		client_key = "client" + str(client_nr)
-		args = parser.parse_args()
 		args.update({'id': client_key})
 		#args = json.dumps(args)
 		
@@ -95,7 +95,7 @@ class Clients(Resource):
 		client_orders_counter = client_key + "_counter" # client<?>_counter
 		shelf[client_orders_counter] = 0
 		
-		return {'message': "Created", 'data': args}, 201
+		return {'message': "Created", 'data': args}, 201, {'Location': '/clients/' + client_nr}
 		
 	
 	def delete(self):
