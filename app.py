@@ -95,7 +95,7 @@ class Clients(Resource):
 		client_orders_counter = client_key + "_counter" # client<?>_counter
 		shelf[client_orders_counter] = 0
 		
-		return {'message': "Created", 'data': args}, 201, {'Location': '/clients/' + client_nr}
+		return {'message': "Created", 'data': args}, 201, {'Location': "/clients/" + str(client_nr)}
 		
 	
 	def delete(self):
