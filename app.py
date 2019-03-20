@@ -86,7 +86,7 @@ class Clients(Resource):
 		client_nr += 1
 		shelf["clients_counter"] = client_nr
 		client_key = "client" + str(client_nr)
-		args.update({'id': client_key})
+		args.update({'id': str(client_nr)})
 		#args = json.dumps(args)
 		
 		print(args)
@@ -200,7 +200,7 @@ class ClientById(Resource):
 		parser.add_argument('address', required=True)
 		parser.add_argument('email', required=True)
 		args = parser.parse_args()
-		args.update({'id': client_key})
+		args.update({'id': str(id)})
 		#args = json.dumps(args)
 		
 		#Edits client
