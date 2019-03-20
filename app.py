@@ -205,7 +205,7 @@ class ClientById(Resource):
 		
 		#Edits client
 		shelf[client_key] = args
-		return {'message': "Created", 'data': args}, 201
+		return {'message': "OK", 'data': args}, 200, {'Location': "/clients/" + str(id)}
 
 
 class ClientByIdOrders(Resource):
