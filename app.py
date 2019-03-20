@@ -334,9 +334,9 @@ def teardown_db(exception):
 def demo():
 	shelf = get_db()
 	shelf["clients_counter"] = 0
-	shelf["client1"] = {'name': 'Tester1', 'address': 'MIF INFO 3', 'email': 'testing@mif.vu.lt', 'id': 'client1'}
-	shelf["client2"] = {'name': 'Tester1', 'address': 'MIF INFO 3', 'email': 'testing@mif.vu.lt', 'id': 'client2'}
-	shelf["client3"] = {'name': 'Tester1', 'address': 'MIF INFO 3', 'email': 'testing@mif.vu.lt', 'id': 'client3'}
+	shelf["client1"] = {'name': 'Tester1', 'address': 'MIF INFO 3', 'email': 'testing@mif.vu.lt', 'id': '1'}
+	shelf["client2"] = {'name': 'Tester1', 'address': 'MIF INFO 3', 'email': 'testing@mif.vu.lt', 'id': '2'}
+	shelf["client3"] = {'name': 'Tester1', 'address': 'MIF INFO 3', 'email': 'testing@mif.vu.lt', 'id': '3'}
 	shelf["client2_order1"] = {'item': 'Pills', 'price': '16.90', 'amount': '10'}
 	shelf["client2_order2"] = {'item': 'Cough Syrup', 'price': '20.90', 'amount': '5'}
 	shelf["client3_order1"] = {'item': 'Mega Pills', 'price': '4.90', 'amount': '2'}
