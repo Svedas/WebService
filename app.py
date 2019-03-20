@@ -159,7 +159,7 @@ class ClientById(Resource):
 		#if order_key in shelf:
 		shelf[order_key] = args
 		
-		return {'message': "Created", 'data': args}, 201
+		return {'message': "Created", 'data': args}, 201, {'Location': "/clients/" + str(id) + "/orders"}
 		
 		
 	def delete(self, id):
@@ -261,7 +261,7 @@ class ClientByIdOrders(Resource):
 		#if order_key in shelf:
 		shelf[order_key] = args
 		
-		return {'message': "Created", 'data': args}, 201
+		return {'message': "Created", 'data': args}, 201, {'Location': "/clients/" + str(id) + "/orders"}
 		
 	
 	def delete(self, id):
